@@ -1,13 +1,13 @@
 # 01_data_prep.R
 library(tidyverse)
 
-df <- read_csv("C:/Users/Shokhifahtul_Jannah/Downloads/Project UAS25 – Prodi GABUNGAN – Shokhifahtul Jannah/wholesale_customers_data.csv")
+# BACA DATA SECARA RELATIF (WAJIB untuk GitHub + shinyapps)
+df <- read_csv("data/wholesale_customers.csv")
 
 summary(df)
 colSums(is.na(df))
 
 num_vars <- df %>% select(where(is.numeric))
-
 df_scaled <- num_vars %>% scale() %>% as.data.frame()
 rownames(df_scaled) <- NULL
 

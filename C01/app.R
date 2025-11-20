@@ -1,4 +1,3 @@
-# app.R
 library(shiny)
 library(tidyverse)
 library(factoextra)
@@ -12,8 +11,8 @@ ui <- fluidPage(
       numericInput("k", "Pilih jumlah cluster (k)", value = 3, min = 2, max = 10),
       actionButton("run", "Run K-Means"),
       hr(),
-      selectInput("xvar","X axis", choices = NULL),
-      selectInput("yvar","Y axis", choices = NULL)
+      selectInput("xvar", "X axis", choices = NULL),
+      selectInput("yvar", "Y axis", choices = NULL)
     ),
     mainPanel(
       tabsetPanel(
@@ -26,7 +25,9 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session){
+
   df <- reactive({ read_csv("data/prepared_data.csv") })
+
   observe({
     num <- df() %>% select(where(is.numeric))
     updateSelectInput(session, "xvar", choices = names(num), selected = names(num)[1])
@@ -35,12 +36,14 @@ server <- function(input, output, session){
   
   output$corr <- renderPlot({
     num <- df() %>% select(where(is.numeric))
-    corrplot::corrplot(cor(num), method='color')
+    corrplot::corrplot(cor(num), method = 'color')
   })
   
   output$hist <- renderPlotly({
     num <- df() %>% select(where(is.numeric))
-    p <- num %>% gather(var,val) %>% ggplot(aes(val)) + geom_histogram(bins=30) + facet_wrap(~var, scales='free')
+    p <- num %>% 
+      gather(var, val) %>% 
+      ggplot(aes(val)) + geom_histogram(bins = 30) + facet_wrap(~var, scales = 'free')
     ggplotly(p)
   })
   
@@ -54,12 +57,14 @@ server <- function(input, output, session){
     req(cluster_res())
     num <- df() %>% select(where(is.numeric))
     km <- cluster_res()
-    dfp <- num %>% mutate(cluster = factor(km$cluster))
-    # PCA for 2D projection
-    pca <- prcomp(num, scale.=TRUE)
-    scores <- as.data.frame(pca$x[,1:2])
+
+    pca <- prcomp(num, scale. = TRUE)
+    scores <- as.data.frame(pca$x[, 1:2])
     scores$cluster <- factor(km$cluster)
-    p <- ggplot(scores, aes(x=PC1, y=PC2, color=cluster)) + geom_point() + theme_minimal()
+
+    p <- ggplot(scores, aes(PC1, PC2, color = cluster)) +
+      geom_point() + theme_minimal()
+
     ggplotly(p)
   })
   
@@ -73,8 +78,7 @@ server <- function(input, output, session){
   
   output$summary <- renderPrint({
     req(cluster_res())
-    km <- cluster_res()
-    print(km)
+    print(cluster_res())
   })
 }
 
